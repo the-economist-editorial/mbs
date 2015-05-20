@@ -6,8 +6,17 @@ var express = require("express"),
 
 var app = express(), hbs;
 
-var port = 3001;
-
+var conf = {
+  "app": {
+    port: 3100
+  },
+  "generator": {
+    "bundles": {
+      "publicFolder": "/bundles"
+    }
+  }
+};
+// Serve static bundles
 app.use('/bundles', express.static(__dirname + '/bundles'));
 // TODO Implements useful log management
 app.use(logger({path: "logs/logs.txt"}));
@@ -16,9 +25,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 hbs =  exphbs.create();
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
-
-// Serve static bundles
-
 
 // TODO Accept request only from specific IP
 // This part expect to receive a data object,
@@ -47,20 +53,24 @@ app.post('/bundle/footer/0.0.1', function (req, res) {
   var template = "single-component";
   console.log(req.body.data);
   var data = JSON.parse(req.body.data);
+  // Replace the data on the project
+  // Run Grunt production to create the bundle
+  // Move the bundle in the public folder
+  // Save the file
   res.render(template, data, function(err, html) {
     var msg = '';
     // Save the file
-    fs.writeFile("bundles/footer/0.0.1/myCustomBundles.html", html, function(err) {
+    fs.writeFile( conf.generator.bundles.publicFolder + "/footer/0.0.1/init.min.js", html, function(err) {
       if(err) {
-         msg = err;
+        msg = err;
       } else {
-        msg = 'Give information about implementation';
+        msg = 'Give information about implementation to the user here';
       }
       res.send(msg);
     });
   });
 });
 
-app.listen(port);
+app.listen(conf.app.port);
 
-console.log("Minerva Bundle Service is running on port:" + port );
+console.log("Minerva Bundle Service is running on port:" + conf.app.port );
